@@ -16,3 +16,6 @@
 
 # broccoli-debug
 /DEBUG/
+
+# vite-plugin-pwa dev output
+/dev-dist/
