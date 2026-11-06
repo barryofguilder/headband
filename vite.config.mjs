@@ -52,8 +52,11 @@ export default defineConfig(({ command, mode, isPreview }) => ({
       extensions,
     }),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // The app decides when to switch to a new version, so it never reloads
+      // mid-round (see app/services/app-update.ts). It also registers the
+      // service worker itself, so nothing is injected into index.html.
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'Headband',
