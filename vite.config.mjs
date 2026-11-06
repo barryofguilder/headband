@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
 import { extensions, classicEmberSupport, ember } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
@@ -13,6 +14,21 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
  */
 const ROOT_URL = process.env.ROOT_URL || '/headband/';
 
+/**
+ * The short commit this build came from, shown on How to play so you can
+ * tell which version a phone is running. Render sets RENDER_GIT_COMMIT.
+ */
+function appVersion() {
+  if (process.env.RENDER_GIT_COMMIT) {
+    return process.env.RENDER_GIT_COMMIT.slice(0, 7);
+  }
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'dev';
+  }
+}
+
 export default defineConfig(({ command, mode, isPreview }) => ({
   // Production builds and `pnpm preview` (which serves that build) use the
   // deployment path. The dev server and `pnpm test` stay at '/'.
@@ -23,6 +39,7 @@ export default defineConfig(({ command, mode, isPreview }) => ({
   define: {
     // True only for `pnpm start`. Turns on dev-only conveniences, like the 5 second round.
     __DEV_SERVER__: JSON.stringify(command === 'serve'),
+    __APP_VERSION__: JSON.stringify(appVersion()),
   },
   plugins: [
     // `pnpm start:phone` serves over HTTPS. Phones only allow tilt on HTTPS.

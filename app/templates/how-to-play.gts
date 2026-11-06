@@ -1,5 +1,6 @@
 import ScreenHeader from 'headband/components/screen-header';
 import InstallHelp from 'headband/components/install-help';
+import AppVersion from 'headband/components/app-version';
 
 const steps = [
   {
@@ -65,6 +66,7 @@ const steps = [
   </div>
 
   <InstallHelp />
+  <AppVersion />
 </template>
 
 function add(a: number, b: number): number {
