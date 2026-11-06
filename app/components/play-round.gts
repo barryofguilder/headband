@@ -128,6 +128,19 @@ export default class PlayRound extends Component<PlayRoundSignature> {
     return LAYOUT_CLASSES[this.rotation];
   }
 
+  /**
+   * Taps answer when the Tap to answer setting is on, and always when tilt
+   * can't: motion access was refused, or the phone isn't sending readings.
+   * Otherwise turning taps off would leave no way to answer.
+   */
+  get tapsWork(): boolean {
+    return (
+      this.settings.tapToAnswer ||
+      this.tilt.access === 'denied' ||
+      !this.tilt.hasReadings
+    );
+  }
+
   get isCountingDown(): boolean {
     return this.playStartsAt !== undefined && this.now < this.playStartsAt;
   }
@@ -311,22 +324,40 @@ export default class PlayRound extends Component<PlayRoundSignature> {
             <p class="text-xl text-white/80">Phone to your forehead!</p>
           </div>
         {{else}}
-          <button
-            type="button"
-            class="flex flex-1 items-start justify-center pt-[max(env(safe-area-inset-top),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
-            {{on "click" (fn this.answer "pass")}}
-            data-test-pass
-          >
-            <span><span aria-hidden="true">↑</span> Pass</span>
-          </button>
-          <button
-            type="button"
-            class="flex flex-1 items-end justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
-            {{on "click" (fn this.answer "correct")}}
-            data-test-correct
-          >
-            <span><span aria-hidden="true">↓</span> Correct</span>
-          </button>
+          {{#if this.tapsWork}}
+            <button
+              type="button"
+              class="flex flex-1 items-start justify-center pt-[max(env(safe-area-inset-top),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
+              {{on "click" (fn this.answer "pass")}}
+              data-test-pass
+            >
+              <span><span aria-hidden="true">↑</span> Pass</span>
+            </button>
+            <button
+              type="button"
+              class="flex flex-1 items-end justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
+              {{on "click" (fn this.answer "correct")}}
+              data-test-correct
+            >
+              <span><span aria-hidden="true">↓</span> Correct</span>
+            </button>
+          {{else}}
+            {{! Taps are off, so these are only hints for which way to tilt. }}
+            <div
+              class="flex flex-1 items-start justify-center pt-[max(env(safe-area-inset-top),0.75rem)] text-lg font-semibold text-white/60"
+              data-test-pass
+              data-test-taps-off
+            >
+              <span><span aria-hidden="true">↑</span> Tilt up to pass</span>
+            </div>
+            <div
+              class="flex flex-1 items-end justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)] text-lg font-semibold text-white/60"
+              data-test-correct
+            >
+              <span><span aria-hidden="true">↓</span>
+                Tilt down when you get it</span>
+            </div>
+          {{/if}}
 
           {{! The word sits on top of both tap zones without blocking taps. }}
           <div

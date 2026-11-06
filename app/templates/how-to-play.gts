@@ -51,8 +51,9 @@ const steps = [
     <div class="border-teal/40 rounded-2xl border p-4">
       <h2 class="text-teal text-lg font-semibold">No sensor? No problem.</h2>
       <p class="mt-1 text-white/80">
-        You can also tap. Tap the bottom half of the screen for a right answer,
-        and the top half to pass.
+        If your phone can’t tilt, tap instead: the bottom half of the screen for
+        a right answer, and the top half to pass. To tap even when tilt works,
+        turn on Tap to answer in Settings.
       </p>
     </div>
 

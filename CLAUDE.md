@@ -80,7 +80,7 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 
 ## Game design
 
-- Tilt is the main control, with tap as a backup (top half to pass, bottom half for correct). iOS needs a motion permission prompt from a user tap, plus HTTPS.
+- Tilt is the main control, with tap as a backup (top half to pass, bottom half for correct). Settings has a Tap to answer switch, off by default so bumping the screen while tilting doesn't count. With it off, the tap zones become tilt hints, but taps still work whenever tilt can't: motion access refused, or no tilt readings (`tilt.hasReadings`). See `tapsWork` in `app/components/play-round.gts`. iOS needs a motion permission prompt from a user tap, plus HTTPS.
 - Rounds default to 60 seconds. The default is set in Settings and can be changed on the Get ready screen, and that change is remembered. A 3-2-1 countdown starts each round.
 - The game is played on phones. Every screen except the round works in both portrait and landscape, and the manifest uses `orientation: "any"`.
   - Landscape layouts use the `sideways:` Tailwind variant (defined in `app/styles/app.css`): landscape and under 540px tall. Desktop browsers are tall enough to keep the portrait-style column. To check landscape on a desktop, use Chrome's device toolbar or a short window.
@@ -102,7 +102,7 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results. Done.
 3. Tilt, landscape and the iOS motion permission. Done.
 4. My categories: create, edit and delete, with the emoji picker. Done.
-5. The Settings screen and polish, plus an "add to your home screen" banner on Home (banner done) for players using a browser instead of the installed app. Detect the installed app with `matchMedia('(display-mode: standalone)')` or `navigator.standalone`. Android Chrome can show its own install prompt (`beforeinstallprompt`). iPhone needs written steps, chosen by Safari version (`Version/NN` in the user agent, since iOS no longer reports its real version), with a fallback for unknown versions. Keep the steps for each version in one file so new iOS releases are easy to add. Steps known so far:
+5. The Settings screen (round length and Tap to answer, done) and polish, plus an "add to your home screen" banner on Home (banner done) for players using a browser instead of the installed app. Detect the installed app with `matchMedia('(display-mode: standalone)')` or `navigator.standalone`. Android Chrome can show its own install prompt (`beforeinstallprompt`). iPhone needs written steps, chosen by Safari version (`Version/NN` in the user agent, since iOS no longer reports its real version), with a fallback for unknown versions. Keep the steps for each version in one file so new iOS releases are easy to add. Steps known so far:
    - iOS 27 Safari: tap the page menu button left of the address (a puzzle piece over lines), then Share, then View More, then Add to Home Screen. Leave "Open as Web App" turned on so the game opens full screen. Confirmed by Jason.
    - iOS 26 Safari: tap ••• next to the address, then Share, then Add to Home Screen (possibly under View More). Not yet confirmed.
    - iOS 18 and earlier: tap Share in the bottom toolbar, then Add to Home Screen. Not yet confirmed.

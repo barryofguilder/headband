@@ -118,6 +118,12 @@ export default class TiltService extends Service {
   @tracked access: MotionAccess = 'unknown';
 
   /**
+   * True once the phone has sent a tilt reading. Computers and phones
+   * without a sensor never do.
+   */
+  @tracked hasReadings = false;
+
+  /**
    * Asks for motion access. On iPhone this shows a prompt, and it only works
    * when called straight from a tap, before anything else is awaited. Other
    * devices don't ask, so they're treated as granted.
@@ -148,6 +154,9 @@ export default class TiltService extends Service {
   listen(onTilt: (direction: TiltDirection) => void): () => void {
     const detector = new TiltDetector(onTilt);
     const handler = (event: DeviceOrientationEvent) => {
+      if (!this.hasReadings && event.beta !== null && event.gamma !== null) {
+        this.hasReadings = true;
+      }
       detector.update(event.beta, event.gamma);
     };
     window.addEventListener('deviceorientation', handler);

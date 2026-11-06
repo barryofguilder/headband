@@ -19,6 +19,7 @@ export const DEFAULT_ROUND_SECONDS = 60;
 
 interface StoredSettings {
   roundSeconds?: unknown;
+  tapToAnswer?: unknown;
 }
 
 /**
@@ -27,14 +28,37 @@ interface StoredSettings {
 export default class SettingsService extends Service {
   @tracked roundSeconds: number = loadRoundSeconds();
 
+  /**
+   * Whether tapping the top or bottom of the screen answers during a round.
+   * Off by default, so a bump doesn't count while tilting. Tapping still
+   * works when tilt can't (see PlayRound.tapsWork).
+   */
+  @tracked tapToAnswer: boolean = readStored()?.tapToAnswer === true;
+
   setRoundSeconds(seconds: number): void {
     this.roundSeconds = seconds;
-    writeJSON('settings', { roundSeconds: seconds });
+    this.#save();
+  }
+
+  setTapToAnswer(enabled: boolean): void {
+    this.tapToAnswer = enabled;
+    this.#save();
+  }
+
+  #save(): void {
+    writeJSON('settings', {
+      roundSeconds: this.roundSeconds,
+      tapToAnswer: this.tapToAnswer,
+    });
   }
 }
 
+function readStored(): StoredSettings | undefined {
+  return readJSON<StoredSettings>('settings');
+}
+
 function loadRoundSeconds(): number {
-  const stored = readJSON<StoredSettings>('settings')?.roundSeconds;
+  const stored = readStored()?.roundSeconds;
   const valid =
     typeof stored === 'number' &&
     (ROUND_LENGTHS.includes(stored) ||
