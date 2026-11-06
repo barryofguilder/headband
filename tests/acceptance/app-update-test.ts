@@ -85,4 +85,22 @@ module('Acceptance | app update', function (hooks) {
         : [];
     assert.strictEqual(registrations.length, 0);
   });
+
+  test('Settings shows the version and that updates need the real app', async function (assert) {
+    await visit('/settings');
+    assert.dom('[data-test-app-update-version]').hasAnyText();
+    assert
+      .dom('[data-test-app-update-status]')
+      .includesText('only work in the installed or online app');
+    assert.dom('[data-test-check-for-updates]').isDisabled();
+  });
+
+  test('Settings says when a new version is ready', async function (assert) {
+    await visit('/play/animals/round');
+    appUpdate(this.owner).updateFound();
+    await visit('/settings');
+    // Leaving the round applied it, so the status moves on.
+    assert.strictEqual(applied, 1);
+    assert.dom('[data-test-app-update-status]').includesText('new version');
+  });
 });

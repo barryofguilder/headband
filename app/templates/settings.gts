@@ -1,6 +1,7 @@
 import ScreenHeader from 'headband/components/screen-header';
 import RoundLengthPicker from 'headband/components/round-length-picker';
 import TapToAnswerSetting from 'headband/components/tap-to-answer-setting';
+import AppUpdateSetting from 'headband/components/app-update-setting';
 
 <template>
   <ScreenHeader @title="Settings" />
@@ -16,5 +17,6 @@ import TapToAnswerSetting from 'headband/components/tap-to-answer-setting';
     </section>
 
     <TapToAnswerSetting />
+    <AppUpdateSetting />
   </div>
 </template>
