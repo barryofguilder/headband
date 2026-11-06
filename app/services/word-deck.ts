@@ -26,7 +26,9 @@ export default class WordDeckService extends Service {
    */
   draw(category: Category): string | undefined {
     const words = uniqueWords(category.words);
-    if (words.length === 0) return undefined;
+    if (words.length === 0) {
+      return undefined;
+    }
 
     const state = this.#sync(category.id, words);
 

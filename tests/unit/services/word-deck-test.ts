@@ -56,7 +56,9 @@ module('Unit | Service | word-deck', function (hooks) {
     const service = deck(this.owner);
     const words = ['A', 'B', 'C'];
     let last: string | undefined;
-    for (let i = 0; i < words.length; i++) last = service.draw(category(words));
+    for (let i = 0; i < words.length; i++) {
+      last = service.draw(category(words));
+    }
 
     const afterReshuffle = service.draw(category(words));
     assert.ok(afterReshuffle, 'keeps dealing');
@@ -70,7 +72,9 @@ module('Unit | Service | word-deck', function (hooks) {
 
     const edited = category(['B', 'C', 'D']);
     const seen = new Set<string | undefined>();
-    for (let i = 0; i < 3; i++) seen.add(service.draw(edited));
+    for (let i = 0; i < 3; i++) {
+      seen.add(service.draw(edited));
+    }
 
     assert.false(seen.has('A'), 'removed word never comes up');
     assert.ok(seen.has('D'), 'new word is dealt');

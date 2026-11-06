@@ -12,6 +12,7 @@ A party game for your phone. One player holds the phone to their forehead, every
 ## Commands
 
 - `pnpm start` runs the dev server. The service worker only runs in a production build.
+- `__DEV_SERVER__` (set in `vite.config.mjs`, typed in `types/dev-server.d.ts`) is `true` only under `pnpm start`. Use it for dev-only shortcuts, such as the 5 second round length. It's `false` in production builds and in `pnpm test`.
 - `pnpm build && pnpm preview --host` tests the PWA on a phone. Installing on iOS needs HTTPS.
 - `pnpm lint` runs all linters, including the type check (`lint:types`).
 - `pnpm test` builds and runs the QUnit tests in headless Chrome.
@@ -36,8 +37,12 @@ Run `pnpm format`, `pnpm lint` and `pnpm test` before saying a step is done.
 
   Plain `//` comments inside function bodies are fine.
 
+- Always use braces for `if`, `else`, `for` and `while`, even for one-line bodies. ESLint enforces this with `curly: ['error', 'all']`.
+- Inject services with a bare `@service declare wordDeck: WordDeckService;`. Don't pass the name, as in `@service('word-deck')`, when it matches the property, because the resolver maps camelCase to the dasherized name.
+- In `.gts` files, never give a variable the name of an HTML tag, such as `button` or `input`. A variable in scope takes priority over the tag, so `<button>` would be treated as a component. Name class string constants like `buttonClass`.
 - Template-only components are typed with `TOC<Signature>` from `@ember/component/template-only`.
 - Add `data-test-*` attributes to elements that tests select.
+- Anything time-based goes through the `clock` service (`app/services/clock.ts`). Tests swap in `FakeClock` from `tests/helpers/fake-clock.ts` and move time with `clock.advance(ms)`, so they never wait in real time.
 - localStorage access goes through `app/utils/storage.ts`, which adds the `headband:` key prefix and fails quietly when storage is unavailable.
 
 ## Accessibility
@@ -65,7 +70,7 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 ### Build steps
 
 1. Home menu, How to play, the category format with Animals and Sports, and the word dealing. Done.
-2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results.
+2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results. Done.
 3. Tilt, landscape and the iOS motion permission.
 4. My categories: create, edit and delete, with the emoji picker.
 5. The Settings screen and polish.

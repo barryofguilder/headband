@@ -57,6 +57,15 @@ export default defineConfig([
       reportUnusedDisableDirectives: 'error',
     },
   },
+  /**
+   * Always use braces for if, else, for, while and do. This has to come after
+   * eslint-config-prettier, which turns the rule off.
+   */
+  {
+    rules: {
+      curly: ['error', 'all'],
+    },
+  },
   {
     files: ['**/*.js'],
     languageOptions: {

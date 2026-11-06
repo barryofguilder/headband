@@ -4,7 +4,11 @@ import { babel } from '@rollup/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  define: {
+    // True only for `pnpm start`. Turns on dev-only conveniences, like the 5 second round.
+    __DEV_SERVER__: JSON.stringify(command === 'serve'),
+  },
   plugins: [
     classicEmberSupport(),
     ember(),
@@ -49,4 +53,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));
