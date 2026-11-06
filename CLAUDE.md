@@ -13,7 +13,8 @@ A party game for your phone. One player holds the phone to their forehead, every
 
 - `pnpm start` runs the dev server. The service worker only runs in a production build.
 - `__DEV_SERVER__` (set in `vite.config.mjs`, typed in `types/dev-server.d.ts`) is `true` only under `pnpm start`. Use it for dev-only shortcuts, such as the 5 second round length. It's `false` in production builds and in `pnpm test`.
-- `pnpm build && pnpm preview --host` tests the PWA on a phone. Installing on iOS needs HTTPS.
+- `pnpm start:phone` runs the dev server over HTTPS on your network, so you can open it on a phone. Phones only allow tilt on HTTPS. The certificate is self-signed, so the browser shows a warning to tap through once.
+- `pnpm preview:phone` builds and serves the production app over HTTPS. Use it to test offline mode and installing to the home screen.
 - `pnpm lint` runs all linters, including the type check (`lint:types`).
 - `pnpm test` builds and runs the QUnit tests in headless Chrome.
 
@@ -47,7 +48,7 @@ Run `pnpm format`, `pnpm lint` and `pnpm test` before saying a step is done.
 
 ## Accessibility
 
-Players may be in a loud, busy room or holding the phone at arm's length. Keep text large and tap targets at least 48px. Never rely on color alone to show meaning. For example, "Correct!" or "Pass" is always written out, not only shown in green or red. Use plain, short wording.
+Players may be in a loud, busy room or holding the phone at arm's length. Keep text large and tap targets at least 48px. Zoom is turned off so the game feels like a native app (viewport meta tag, `touch-action: pan-x pan-y` in `app/styles/app.css`, and `app/utils/prevent-zoom.ts`), so players can't enlarge small text. Body text should be at least 16px, which also stops iOS from zooming into text fields. Never rely on color alone to show meaning. For example, "Correct!" or "Pass" is always written out, not only shown in green or red. Use plain, short wording.
 
 ## Categories
 
@@ -61,7 +62,9 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 
 - Tilt is the main control, with tap as a backup (top half to pass, bottom half for correct). iOS needs a motion permission prompt from a user tap, plus HTTPS.
 - Rounds default to 60 seconds. The default is set in Settings and can be changed on the Get ready screen, and that change is remembered. A 3-2-1 countdown starts each round.
-- Rounds are played in landscape, and the menus stay upright. iOS can't lock orientation for each screen, so the manifest needs `orientation: "any"` (it's currently `"portrait"`), and the player is asked to turn the phone sideways.
+- Rounds are played in landscape, and the menus stay upright. iOS can't lock orientation for each screen, so the manifest uses `orientation: "any"` and the round waits on a "Turn your phone sideways" screen until the phone is sideways. Once a round starts, turning the phone doesn't pause it.
+- Tilt (`app/services/tilt.ts`) measures how far the screen faces the floor or ceiling from the `deviceorientation` angles, so it works in either landscape direction. Past about 30 degrees counts, and the phone has to return near upright before the next tilt counts. Tests use `FakeTilt` and `FakeOrientation` from `tests/helpers/fake-device.ts`.
+- The round asks the browser to keep the screen on (`app/utils/wake-lock.ts`), since nobody touches the screen when playing by tilt.
 - Score is per round only, with no running totals or teams. The word on screen when time runs out counts as a pass.
 - Results show the score, the words guessed right and the words passed, with the buttons "Play again", "New category" and "Home".
 - Screen flow: Home (Play, My categories, How to play, Settings), then Pick a category, Get ready, 3-2-1, Round, Results.
@@ -71,7 +74,7 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 
 1. Home menu, How to play, the category format with Animals and Sports, and the word dealing. Done.
 2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results. Done.
-3. Tilt, landscape and the iOS motion permission.
+3. Tilt, landscape and the iOS motion permission. Done.
 4. My categories: create, edit and delete, with the emoji picker.
 5. The Settings screen and polish.
 

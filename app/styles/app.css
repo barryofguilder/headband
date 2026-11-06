@@ -5,6 +5,19 @@
   --color-plum-900: #2f193b;
   --color-plum-700: #572e72;
   --color-plum-500: #8260a2;
+  --animate-turn: turn 2s ease-in-out infinite;
+
+  @keyframes turn {
+    0%,
+    25% {
+      transform: rotate(0deg);
+    }
+
+    60%,
+    100% {
+      transform: rotate(-90deg);
+    }
+  }
 }
 
 @layer base {
@@ -13,6 +26,11 @@
     height: 100%;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
+
+    /* No double-tap or pinch zoom, so the game feels like a native app.
+       Keep text large, since players can't zoom in. Works with the viewport
+       meta tag and the gesture handler in app/app.ts. */
+    touch-action: pan-x pan-y;
   }
 
   body {

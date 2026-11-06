@@ -3,6 +3,7 @@ import { extensions, classicEmberSupport, ember } from '@embroider/vite';
 import { babel } from '@rollup/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig(({ command }) => ({
   define: {
@@ -10,6 +11,8 @@ export default defineConfig(({ command }) => ({
     __DEV_SERVER__: JSON.stringify(command === 'serve'),
   },
   plugins: [
+    // `pnpm start:phone` serves over HTTPS. Phones only allow tilt on HTTPS.
+    ...(process.env.HTTPS ? [basicSsl()] : []),
     classicEmberSupport(),
     ember(),
     tailwindcss(),
@@ -28,7 +31,7 @@ export default defineConfig(({ command }) => ({
         theme_color: '#2f193b',
         background_color: '#2f193b',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         start_url: '/',
         scope: '/',
         icons: [

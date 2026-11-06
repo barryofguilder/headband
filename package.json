@@ -28,9 +28,11 @@
     "lint:js:fix": "eslint . --fix",
     "lint:types": "ember-tsc --noEmit",
     "start": "vite",
+    "start:phone": "HTTPS=1 vite --host",
     "test": "vite build --mode development && testem ci --port 0",
     "generate-pwa-assets": "pwa-assets-generator",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:phone": "vite build && HTTPS=1 vite preview --host"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -60,6 +62,7 @@
     "@types/qunit": "^2.19.14",
     "@types/rsvp": "^4.0.9",
     "@vite-pwa/assets-generator": "^2.0.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "babel-plugin-ember-template-compilation": "^4.0.0",
     "concurrently": "^9.2.4",
     "decorator-transforms": "^2.4.0",

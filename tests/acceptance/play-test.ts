@@ -6,6 +6,11 @@ import {
   type FakeClock,
 } from 'headband/tests/helpers/fake-clock';
 import { clearAppStorage } from 'headband/tests/helpers/storage';
+import {
+  useFakeDevice,
+  type FakeOrientation,
+  type FakeTilt,
+} from 'headband/tests/helpers/fake-device';
 import { COUNTDOWN_SECONDS, FEEDBACK_MS } from 'headband/components/play-round';
 import type GameService from 'headband/services/game';
 
@@ -13,10 +18,13 @@ module('Acceptance | play', function (hooks) {
   setupApplicationTest(hooks);
 
   let clock: FakeClock;
+  let tilt: FakeTilt;
+  let orientation: FakeOrientation;
 
   hooks.beforeEach(function () {
     clearAppStorage();
     clock = useFakeClock(this.owner);
+    ({ tilt, orientation } = useFakeDevice(this.owner));
   });
   hooks.afterEach(function () {
     clearAppStorage();
@@ -139,6 +147,76 @@ module('Acceptance | play', function (hooks) {
 
     const game = this.owner.lookup('service:game') as GameService;
     assert.strictEqual(game.lastResult, undefined, 'no result is saved');
+  });
+
+  test('tilting down is correct and tilting up is a pass', async function (assert) {
+    await visit('/play/animals');
+    await click('[data-test-start]');
+    await clock.advance(COUNTDOWN_SECONDS * 1000);
+    const first = wordOnScreen();
+
+    await tilt.tiltPhone('down');
+    assert.dom('[data-test-feedback="correct"]').exists();
+
+    // A second tilt during the feedback is ignored.
+    await tilt.tiltPhone('up');
+    await clock.advance(FEEDBACK_MS);
+    const second = wordOnScreen();
+
+    await tilt.tiltPhone('up');
+    assert.dom('[data-test-feedback="pass"]').exists();
+
+    await clock.advance(60_000);
+    assert.dom('[data-test-correct-list]').includesText(first);
+    assert.dom('[data-test-passed-list]').includesText(second);
+  });
+
+  test('tilts during the countdown are ignored', async function (assert) {
+    await visit('/play/animals/round');
+    await tilt.tiltPhone('down');
+    await clock.advance(COUNTDOWN_SECONDS * 1000);
+    assert.dom('[data-test-word]').exists();
+    assert.dom('[data-test-feedback]').doesNotExist();
+  });
+
+  test('the round waits for the phone to turn sideways', async function (assert) {
+    orientation.isLandscape = false;
+    await visit('/play/animals/round');
+
+    assert.dom('[data-test-turn-sideways]').exists();
+    assert.dom('[data-test-countdown]').doesNotExist();
+
+    await clock.advance(10_000);
+    assert.dom('[data-test-turn-sideways]').exists('still waiting');
+
+    orientation.isLandscape = true;
+    await clock.advance(100);
+    assert.dom('[data-test-turn-sideways]').doesNotExist();
+    assert.dom('[data-test-countdown]').hasText('3');
+  });
+
+  test('turning the phone upright mid-round does not pause it', async function (assert) {
+    await visit('/play/animals/round');
+    await clock.advance(COUNTDOWN_SECONDS * 1000);
+    orientation.isLandscape = false;
+    await clock.advance(1000);
+    assert.dom('[data-test-word]').exists();
+    assert.dom('[data-test-turn-sideways]').doesNotExist();
+  });
+
+  test('Start asks for motion access, and a refusal still lets you play by tapping', async function (assert) {
+    tilt.nextAccess = 'denied';
+    await visit('/play/animals');
+    assert.dom('[data-test-tilt-off]').doesNotExist();
+
+    await click('[data-test-start]');
+    assert.strictEqual(currentURL(), '/play/animals/round');
+    await clock.advance(COUNTDOWN_SECONDS * 1000);
+    await click('[data-test-correct]');
+    assert.dom('[data-test-feedback="correct"]').exists('tapping still works');
+
+    await click('[data-test-quit]');
+    assert.dom('[data-test-tilt-off]').includesText('Tilt is off.');
   });
 
   test('unknown categories and missing results redirect', async function (assert) {
