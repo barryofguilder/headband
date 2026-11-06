@@ -1,4 +1,5 @@
 import { LinkTo } from '@ember/routing';
+import { LOGO_URL } from 'headband/utils/asset-url';
 import InstallBanner from 'headband/components/install-banner';
 
 const buttonClass =
@@ -12,7 +13,7 @@ const buttonClass =
       class="sideways:flex-1 sideways:gap-2 flex flex-col items-center gap-4 text-center"
     >
       <img
-        src="/logo.svg"
+        src={{LOGO_URL}}
         alt=""
         class="sideways:size-24 size-32 drop-shadow-lg"
       />

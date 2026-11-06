@@ -5,7 +5,21 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 
-export default defineConfig(({ command }) => ({
+/**
+ * Deployment path. See the matching note in config/environment.js, which
+ * reads the same variable so the two can't drift. This is the path the
+ * BROWSER requests, not where the origin stores the files. Development and
+ * tests always use '/'.
+ */
+const ROOT_URL = process.env.ROOT_URL || '/headband/';
+
+export default defineConfig(({ command, mode, isPreview }) => ({
+  // Production builds and `pnpm preview` (which serves that build) use the
+  // deployment path. The dev server and `pnpm test` stay at '/'.
+  base:
+    (command === 'build' && mode === 'production') || isPreview
+      ? ROOT_URL
+      : '/',
   define: {
     // True only for `pnpm start`. Turns on dev-only conveniences, like the 5 second round.
     __DEV_SERVER__: JSON.stringify(command === 'serve'),
@@ -33,8 +47,10 @@ export default defineConfig(({ command }) => ({
         display: 'standalone',
         // Every screen works both ways. The round asks for landscape itself.
         orientation: 'any',
-        start_url: '/',
-        scope: '/',
+        // Relative, so they resolve against the manifest's own URL and work
+        // under any ROOT_URL.
+        start_url: './',
+        scope: './',
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
@@ -49,7 +65,7 @@ export default defineConfig(({ command }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
       },
       devOptions: {

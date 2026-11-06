@@ -12,6 +12,17 @@ if (macroCondition(isDevelopingApp())) {
   importSync('./deprecation-workflow');
 }
 
+// The game lives in a folder (rootURL, like /headband/). Someone typing
+// barryofguilder.com/headband without the last slash wouldn't match it, so
+// add the slash before the router reads the address.
+if (`${window.location.pathname}/` === config.rootURL) {
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${config.rootURL}${window.location.search}${window.location.hash}`,
+  );
+}
+
 export default class App extends Application {
   modulePrefix = config.modulePrefix;
   podModulePrefix = config.podModulePrefix;

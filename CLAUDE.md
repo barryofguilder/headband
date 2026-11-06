@@ -26,6 +26,22 @@ Run `pnpm format`, `pnpm lint` and `pnpm test` before saying a step is done.
 - The game is built in small steps. Commit only when asked, usually after each step. Don't push unless asked.
 - Never add a `Co-Authored-By: Claude` line or any other Claude attribution to commit messages.
 
+## Deploying
+
+- Hosted as a Render static site, reached at `barryofguilder.com/headband/` through a rewrite on the main domain that strips the prefix (the same setup as reverse-audio). The build must target `/headband/`, the path the BROWSER requests, even though Render serves from its own root.
+- `ROOT_URL` (default `/headband/`) feeds both Ember's `rootURL` (`config/environment.js`) and Vite's `base` (`vite.config.mjs`), so they can't drift. Production builds and `pnpm preview` use it; the dev server and tests use `/`. Build with `ROOT_URL=/` to serve straight off the Render URL.
+- Unlike reverse-audio, the game has real pages (`/play/animals`, `/my-categories/...`), so it keeps `locationType: 'history'`. Render needs a rewrite of `/*` to `/index.html` so reloading or opening a deep link works. Unknown paths go to Home (`app/routes/not-found.ts`), and `app/app.ts` adds the trailing slash when someone visits `/headband`.
+- Files in `public/` referenced from app code must go through `assetUrl()` or `LOGO_URL` in `app/utils/asset-url.ts`. A bare `/logo.svg` skips the folder and 404s. Root-relative links in `index.html` and `url()` in CSS are rewritten by Vite automatically.
+- The manifest's `start_url` and `scope` are relative (`./`) so they work under any `ROOT_URL`.
+- Render rules, in order. On the **barryofguilder** site (main domain), above its catch-all `/` rule, all Rewrite:
+  - `/headband` → `https://headband-mqcf.onrender.com/`
+  - `/headband/*` → `https://headband-mqcf.onrender.com/*`
+- On the **headband** site, both Rewrite:
+  - `/assets/*` → `/assets/`, so a missing asset (like an old hashed file after a deploy) gets a 404 instead of `index.html`, which would fail with a MIME type error.
+  - `/*` → `/index.html`, so deep links and reloads work.
+- After changing rules, they can take a minute to reach all of Render's servers. Requests may fail on and off until then.
+- `app/services/install.ts` is started by an instance initializer so Chrome's `beforeinstallprompt` isn't missed. Because it starts at boot, tests can't swap it with `owner.register`. Adjust the running service instead (see `tests/acceptance/install-banner-test.ts`).
+
 ## Code style
 
 - Write doc comments in multi-line JSDoc format, even short ones. Don't use the one-line `/** ... */` form.

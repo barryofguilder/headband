@@ -1,5 +1,20 @@
 'use strict';
 
+/**
+ * Deployment path: the path the BROWSER sees, which isn't where the files sit
+ * on the origin server.
+ *
+ * The game is reached at barryofguilder.com/headband/, where a rewrite
+ * proxies through to the Render static site that hosts it. The rewrite strips
+ * the prefix on the way, so Render serves the files from its own root. The
+ * browser still asks for /headband/assets/..., so that's what the build needs.
+ *
+ * Override to build for somewhere else, like ROOT_URL=/ to run straight off
+ * the Render URL. vite.config.mjs reads the same variable, so `rootURL` and
+ * Vite's `base` can't drift apart.
+ */
+const ROOT_URL = process.env.ROOT_URL || '/headband/';
+
 module.exports = function (environment) {
   const ENV = {
     modulePrefix: 'headband',
@@ -41,7 +56,7 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    // here you can enable a production-specific feature
+    ENV.rootURL = ROOT_URL;
   }
 
   return ENV;

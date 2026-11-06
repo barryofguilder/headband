@@ -30,4 +30,10 @@ module('Acceptance | main menu', function (hooks) {
     await visit('/how-to-play');
     assert.dom('[data-test-how-to-play] li').exists({ count: 6 });
   });
+
+  test('an unknown address goes to the Home screen', async function (assert) {
+    await visit('/not/a/real/page');
+    assert.strictEqual(currentURL(), '/');
+    assert.dom('[data-test-menu]').exists({ count: 4 });
+  });
 });

@@ -1,4 +1,5 @@
 import type { TOC } from '@ember/component/template-only';
+import { LOGO_URL } from 'headband/utils/asset-url';
 import type { Category } from 'headband/categories';
 
 interface CategoryIconSignature {
@@ -22,7 +23,7 @@ const CategoryIcon: TOC<CategoryIconSignature> = <template>
       {{@category.emoji}}
     {{else}}
       <img
-        src="/logo.svg"
+        src={{LOGO_URL}}
         alt=""
         class="size-[1.1em] rounded-[0.2em] ring-2 ring-white/25"
         data-test-default-icon

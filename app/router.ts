@@ -18,4 +18,5 @@ Router.map(function () {
   });
   this.route('how-to-play');
   this.route('settings');
+  this.route('not-found', { path: '/*path' });
 });
