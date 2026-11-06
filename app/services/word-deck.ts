@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 import type { Category } from 'headband/categories';
-import { readJSON, writeJSON } from 'headband/utils/storage';
+import { readJSON, removeKey, writeJSON } from 'headband/utils/storage';
 import { shuffle } from 'headband/utils/shuffle';
 
 interface DeckState {
@@ -54,6 +54,13 @@ export default class WordDeckService extends Service {
   remaining(category: Category): number {
     const words = uniqueWords(category.words);
     return this.#sync(category.id, words).queue.length;
+  }
+
+  /**
+   * Forgets which words have been played, for a category that was deleted.
+   */
+  forget(categoryId: string): void {
+    removeKey(storageKey(categoryId));
   }
 
   /**

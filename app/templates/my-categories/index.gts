@@ -1,7 +1,7 @@
 import ScreenHeader from 'headband/components/screen-header';
-import ComingSoon from 'headband/components/coming-soon';
+import MyCategoryList from 'headband/components/my-category-list';
 
 <template>
   <ScreenHeader @title="My categories" />
-  <ComingSoon />
+  <MyCategoryList />
 </template>

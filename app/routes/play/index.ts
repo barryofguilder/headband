@@ -6,6 +6,6 @@ export default class PlayIndexRoute extends Route {
   @service declare categories: CategoriesService;
 
   model() {
-    return this.categories.all;
+    return this.categories.playable;
   }
 }

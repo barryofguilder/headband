@@ -16,6 +16,7 @@ module('Unit | built-in categories', function () {
       ids.add(category.id);
       assert.ok(category.name, `${category.id} has a name`);
       assert.ok(category.emoji, `${category.id} has an emoji`);
+      assert.notOk(category.isCustom, `${category.id} is not marked custom`);
       assert.ok(
         category.words.length >= 20,
         `${category.id} has at least 20 words`,

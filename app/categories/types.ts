@@ -5,8 +5,13 @@ export interface Category {
   id: string;
   name: string;
   /**
-   * Shown on the category card.
+   * Shown on the category card. Built-in categories always have one. Custom
+   * categories can leave it out and get the default icon.
    */
-  emoji: string;
+  emoji?: string;
   words: string[];
+  /**
+   * True for categories the player made.
+   */
+  isCustom?: boolean;
 }

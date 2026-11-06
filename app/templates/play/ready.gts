@@ -1,5 +1,6 @@
 import type { TOC } from '@ember/component/template-only';
 import ScreenHeader from 'headband/components/screen-header';
+import CategoryIcon from 'headband/components/category-icon';
 import RoundLengthPicker from 'headband/components/round-length-picker';
 import StartRoundButton from 'headband/components/start-round-button';
 import type { Category } from 'headband/categories';
@@ -22,10 +23,7 @@ const PlayReady: TOC<{ Args: { model: Category } }> = <template>
       class="sideways:flex sideways:flex-col sideways:items-center sideways:justify-center sideways:gap-3 sideways:rounded-3xl sideways:bg-plum-700/60 sideways:p-5 contents"
     >
       <div class="order-1 flex flex-col items-center gap-2 text-center">
-        <span
-          class="sideways:text-6xl text-7xl"
-          aria-hidden="true"
-        >{{@model.emoji}}</span>
+        <CategoryIcon @category={{@model}} class="sideways:text-6xl text-7xl" />
         <h2 class="text-3xl font-bold" data-test-ready-category>
           {{@model.name}}
         </h2>

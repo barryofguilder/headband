@@ -12,7 +12,10 @@ Router.map(function () {
     this.route('round', { path: '/:category_id/round' });
     this.route('results', { path: '/:category_id/results' });
   });
-  this.route('my-categories');
+  this.route('my-categories', function () {
+    this.route('new');
+    this.route('edit', { path: '/:category_id' });
+  });
   this.route('how-to-play');
   this.route('settings');
 });

@@ -1,6 +1,7 @@
 import { LinkTo } from '@ember/routing';
 import type { TOC } from '@ember/component/template-only';
 import { pageTitle } from 'ember-page-title';
+import CategoryIcon from 'headband/components/category-icon';
 import type { ResultsModel } from 'headband/routes/play/results';
 
 const buttonClass =
@@ -16,7 +17,7 @@ const PlayResults: TOC<{ Args: { model: ResultsModel } }> = <template>
       class="sideways:col-start-1 sideways:row-start-1 flex flex-col items-center gap-1 text-center"
     >
       <p class="text-lg text-white/80">
-        <span aria-hidden="true">{{@model.category.emoji}}</span>
+        <CategoryIcon @category={{@model.category}} />
         {{@model.category.name}}
       </p>
       <h1

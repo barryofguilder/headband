@@ -71,14 +71,17 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 - Score is per round only, with no running totals or teams. The word on screen when time runs out counts as a pass.
 - Results show the score, the words guessed right and the words passed, with the buttons "Play again", "New category" and "Home".
 - Screen flow: Home (Play, My categories, How to play, Settings), then Pick a category, Get ready, 3-2-1, Round, Results.
-- Players can create, edit and delete their own categories, saved on the device. Each one can have an optional emoji, and a default icon is used when none is picked. Delete asks for confirmation first.
+- Players can create, edit and delete their own categories, saved on the device. Each one can have an optional emoji, and a default icon (the Headband logo, `app/components/category-icon.gts`) is used when none is picked. Delete asks for confirmation first, using `app/components/confirm-dialog.gts`.
+  - `app/services/custom-categories.ts` saves them under the `custom-categories` storage key, with ids like `custom-<uuid>`. `app/services/categories.ts` combines built-in and custom categories. Use `categories.playable` for anything the player can start, since a custom category can have no words.
+  - Saving needs a name and at least one word. Words are cleaned by `cleanWords` in `app/utils/words.ts`: trimmed, blanks dropped, and repeats dropped regardless of capitals. Pasting a list with commas or line breaks adds every word.
+  - Deleting a category also clears its played-word history (`wordDeck.forget`).
 
 ### Build steps
 
 1. Home menu, How to play, the category format with Animals and Sports, and the word dealing. Done.
 2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results. Done.
 3. Tilt, landscape and the iOS motion permission. Done.
-4. My categories: create, edit and delete, with the emoji picker.
+4. My categories: create, edit and delete, with the emoji picker. Done.
 5. The Settings screen and polish.
 
 ### Future enhancements (after the base game)
