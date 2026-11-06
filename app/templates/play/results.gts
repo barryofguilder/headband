@@ -2,6 +2,7 @@ import { LinkTo } from '@ember/routing';
 import type { TOC } from '@ember/component/template-only';
 import { pageTitle } from 'ember-page-title';
 import CategoryIcon from 'headband/components/category-icon';
+import AnswerIcon from 'headband/components/answer-icon';
 import type { ResultsModel } from 'headband/routes/play/results';
 
 const buttonClass =
@@ -34,7 +35,7 @@ const PlayResults: TOC<{ Args: { model: ResultsModel } }> = <template>
     >
       <section class="bg-plum-700/60 rounded-2xl p-4" data-test-correct-list>
         <h2 class="mb-2 text-lg font-semibold">
-          <span aria-hidden="true">✓</span>
+          <AnswerIcon @kind="correct" class="text-teal" />
           Got it ({{@model.result.correct.length}})
         </h2>
         {{#if @model.result.correct.length}}
@@ -52,7 +53,7 @@ const PlayResults: TOC<{ Args: { model: ResultsModel } }> = <template>
 
       <section class="bg-plum-700/60 rounded-2xl p-4" data-test-passed-list>
         <h2 class="mb-2 text-lg font-semibold">
-          <span aria-hidden="true">↷</span>
+          <AnswerIcon @kind="pass" />
           Passed ({{@model.result.passed.length}})
         </h2>
         {{#if @model.result.passed.length}}

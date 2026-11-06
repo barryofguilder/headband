@@ -14,6 +14,7 @@ import type TiltService from 'headband/services/tilt';
 import type { ContentRotation, TiltDirection } from 'headband/services/tilt';
 import type WordDeckService from 'headband/services/word-deck';
 import { keepScreenOn } from 'headband/utils/wake-lock';
+import AnswerIcon from 'headband/components/answer-icon';
 
 /**
  * Seconds of 3-2-1 before the first word.
@@ -332,8 +333,15 @@ export default class PlayRound extends Component<PlayRoundSignature> {
             class="pointer-events-none absolute inset-0 flex items-center justify-center px-16"
           >
             {{#if this.feedback}}
+              {{! A quick wash of color across the whole screen, easy to see
+                  from across the room. Off when Reduce Motion is on. }}
+              <div
+                class="motion-safe:animate-wash absolute inset-0 opacity-0
+                  {{if (eq this.feedback 'correct') 'bg-teal' 'bg-plum-500'}}"
+                aria-hidden="true"
+              ></div>
               <p
-                class="flex items-center gap-3 rounded-3xl px-8 py-4 text-6xl font-bold
+                class="motion-safe:animate-feedback relative flex items-center gap-3 rounded-3xl px-8 py-4 text-6xl font-bold
                   {{if
                     (eq this.feedback 'correct')
                     'bg-teal text-plum-900'
@@ -343,16 +351,16 @@ export default class PlayRound extends Component<PlayRoundSignature> {
                 data-test-feedback={{this.feedback}}
               >
                 {{#if (eq this.feedback "correct")}}
-                  <span aria-hidden="true">✓</span>
+                  <AnswerIcon @kind="correct" />
                   Correct!
                 {{else}}
-                  <span aria-hidden="true">↷</span>
+                  <AnswerIcon @kind="pass" />
                   Pass
                 {{/if}}
               </p>
             {{else if this.word}}
               <p
-                class="text-center text-7xl leading-tight font-bold break-words"
+                class="motion-safe:animate-word-in text-center text-7xl leading-tight font-bold break-words"
                 aria-live="polite"
                 data-test-word
               >{{this.word}}</p>

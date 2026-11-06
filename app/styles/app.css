@@ -11,6 +11,62 @@
   --color-plum-500: #8260a2;
   --animate-turn: turn 2s ease-in-out infinite;
 
+  /* Answer feedback in the round. The 600ms matches FEEDBACK_MS in
+     app/components/play-round.gts, so the badge is gone right as the next
+     word comes in. */
+  --animate-feedback: feedback 600ms ease-out forwards;
+  --animate-wash: wash 600ms ease-out;
+  --animate-word-in: word-in 220ms ease-out;
+
+  @keyframes feedback {
+    0% {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+
+    25% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+
+    40%,
+    75% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes wash {
+    0% {
+      opacity: 0;
+    }
+
+    20% {
+      opacity: 0.35;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes word-in {
+    0% {
+      opacity: 0;
+      transform: translateY(0.5em) scale(0.96);
+    }
+
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   @keyframes turn {
     0%,
     25% {
