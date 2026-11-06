@@ -268,7 +268,10 @@ export default class PlayRound extends Component<PlayRoundSignature> {
   }
 
   <template>
-    <div class="bg-plum-900 fixed inset-0 z-10 select-none" data-test-round>
+    <div
+      class="bg-plum-900 fixed inset-0 z-10 overscroll-none select-none"
+      data-test-round
+    >
       <div
         class={{this.layoutClass}}
         data-test-round-layout={{if this.rotation this.rotation "normal"}}

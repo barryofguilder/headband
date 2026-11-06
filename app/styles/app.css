@@ -28,7 +28,11 @@
   html,
   body {
     height: 100%;
-    overscroll-behavior: none;
+
+    /* Keeps the bounce (iPhone) and stretch (Android) at the ends of a
+       scroll, but stops Android Chrome's pull-to-refresh from reloading the
+       game. The round turns all of it off (overscroll-none in play-round). */
+    overscroll-behavior: contain;
     -webkit-tap-highlight-color: transparent;
 
     /* No double-tap or pinch zoom, so the game feels like a native app.
