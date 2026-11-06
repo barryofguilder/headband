@@ -7,5 +7,8 @@ export default class Router extends EmberRouter {
 }
 
 Router.map(function () {
-  // Add route declarations here
+  this.route('play');
+  this.route('my-categories');
+  this.route('how-to-play');
+  this.route('settings');
 });
