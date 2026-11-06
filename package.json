@@ -97,9 +97,13 @@
     "vite-plugin-pwa": "^2.0.0"
   },
   "engines": {
-    "node": ">= 20.19.0"
+    "node": "24.22.2"
   },
+  "packageManager": "pnpm@9.9.0",
   "ember": {
     "edition": "octane"
+  },
+  "volta": {
+    "node": "24.22.2"
   }
 }

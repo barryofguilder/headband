@@ -33,6 +33,7 @@ Run `pnpm format`, `pnpm lint` and `pnpm test` before saying a step is done.
 - Unlike reverse-audio, the game has real pages (`/play/animals`, `/my-categories/...`), so it keeps `locationType: 'history'`. Render needs a rewrite of `/*` to `/index.html` so reloading or opening a deep link works. Unknown paths go to Home (`app/routes/not-found.ts`), and `app/app.ts` adds the trailing slash when someone visits `/headband`.
 - Files in `public/` referenced from app code must go through `assetUrl()` or `LOGO_URL` in `app/utils/asset-url.ts`. A bare `/logo.svg` skips the folder and 404s. Root-relative links in `index.html` and `url()` in CSS are rewritten by Vite automatically.
 - The manifest's `start_url` and `scope` are relative (`./`) so they work under any `ROOT_URL`.
+- The headband site's settings live in `render.yaml` (a Render Blueprint), so change them there, not in the dashboard. It deploys only after the GitHub checks in `.github/workflows/ci.yml` (lint and tests) pass (`autoDeployTrigger: checksPass`). The pnpm version comes from `packageManager` in `package.json`, for both CI and local use. Node is pinned with Volta (`volta.node` in `package.json`), and `engines.node` is pinned to the same exact version. CI reads the Volta pin and Render reads `engines`, so change both together.
 - Render rules, in order. On the **barryofguilder** site (main domain), above its catch-all `/` rule, all Rewrite:
   - `/headband` → `https://headband-mqcf.onrender.com/`
   - `/headband/*` → `https://headband-mqcf.onrender.com/*`
