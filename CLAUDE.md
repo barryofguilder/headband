@@ -82,7 +82,11 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 2. A playable game with tap controls: Pick a category, Get ready, the countdown, the round and Results. Done.
 3. Tilt, landscape and the iOS motion permission. Done.
 4. My categories: create, edit and delete, with the emoji picker. Done.
-5. The Settings screen and polish.
+5. The Settings screen and polish, plus an "add to your home screen" banner on Home (banner done) for players using a browser instead of the installed app. Detect the installed app with `matchMedia('(display-mode: standalone)')` or `navigator.standalone`. Android Chrome can show its own install prompt (`beforeinstallprompt`). iPhone needs written steps, chosen by Safari version (`Version/NN` in the user agent, since iOS no longer reports its real version), with a fallback for unknown versions. Keep the steps for each version in one file so new iOS releases are easy to add. Steps known so far:
+   - iOS 27 Safari: tap the page menu button left of the address (a puzzle piece over lines), then Share, then View More, then Add to Home Screen. Leave "Open as Web App" turned on so the game opens full screen. Confirmed by Jason.
+   - iOS 26 Safari: tap ••• next to the address, then Share, then Add to Home Screen (possibly under View More). Not yet confirmed.
+   - iOS 18 and earlier: tap Share in the bottom toolbar, then Add to Home Screen. Not yet confirmed.
+   - Chrome on iPhone: Share is in the address bar. In-app browsers (Instagram, Messenger) can't add to the home screen, so tell players to open the page in Safari.
 
 ### Future enhancements (after the base game)
 

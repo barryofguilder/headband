@@ -1,4 +1,5 @@
 import { LinkTo } from '@ember/routing';
+import InstallBanner from 'headband/components/install-banner';
 
 const buttonClass =
   'flex min-h-16 sideways:min-h-13 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold active:scale-95 transition-transform';
@@ -54,4 +55,8 @@ const buttonClass =
       </LinkTo>
     </nav>
   </section>
+
+  <div class="sideways:mt-4 mt-6">
+    <InstallBanner />
+  </div>
 </template>

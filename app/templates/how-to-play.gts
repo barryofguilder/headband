@@ -1,4 +1,5 @@
 import ScreenHeader from 'headband/components/screen-header';
+import InstallHelp from 'headband/components/install-help';
 
 const steps = [
   {
@@ -62,6 +63,8 @@ const steps = [
       </p>
     </div>
   </div>
+
+  <InstallHelp />
 </template>
 
 function add(a: number, b: number): number {
