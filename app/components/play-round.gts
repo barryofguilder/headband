@@ -11,7 +11,7 @@ import type GameService from 'headband/services/game';
 import type OrientationService from 'headband/services/orientation';
 import type SettingsService from 'headband/services/settings';
 import type TiltService from 'headband/services/tilt';
-import type { TiltDirection } from 'headband/services/tilt';
+import type { ContentRotation, TiltDirection } from 'headband/services/tilt';
 import type WordDeckService from 'headband/services/word-deck';
 import { keepScreenOn } from 'headband/utils/wake-lock';
 
@@ -27,6 +27,25 @@ export const COUNTDOWN_SECONDS = 3;
 export const FEEDBACK_MS = 600;
 
 const TICK_MS = 100;
+
+/**
+ * How long the phone has to be held sideways with the screen still upright
+ * before the round draws itself sideways. This gives the screen time to
+ * rotate on its own when rotation lock is off.
+ */
+export const ROTATION_LOCK_GRACE_MS = 1000;
+
+/**
+ * Layouts for the round. When the screen didn't rotate, the round is drawn
+ * sideways inside the upright screen.
+ */
+const LAYOUT_CLASSES = {
+  normal:
+    'absolute inset-0 flex flex-col pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]',
+  '90': 'absolute top-1/2 left-1/2 flex h-[100dvw] w-[100dvh] -translate-1/2 rotate-90 flex-col',
+  '-90':
+    'absolute top-1/2 left-1/2 flex h-[100dvw] w-[100dvh] -translate-1/2 -rotate-90 flex-col',
+} as const;
 
 type Answer = 'correct' | 'pass';
 
@@ -63,6 +82,14 @@ export default class PlayRound extends Component<PlayRoundSignature> {
   @tracked playStartsAt?: number;
   endsAt?: number;
 
+  /**
+   * Set when the phone is sideways but the screen didn't rotate, so the
+   * round is drawn sideways instead.
+   */
+  @tracked rotation?: ContentRotation;
+
+  #sideways?: ContentRotation;
+  #sidewaysSince = 0;
   #feedbackUntil = 0;
   #done = false;
   #cleanups: (() => void)[] = [];
@@ -75,6 +102,7 @@ export default class PlayRound extends Component<PlayRoundSignature> {
     this.#cleanups.push(
       this.clock.every(TICK_MS, this.tick),
       this.tilt.listen(this.onTilt),
+      this.tilt.watchSideways(this.onSideways),
       keepScreenOn(),
       () => this.orientation.unlock(),
     );
@@ -89,6 +117,14 @@ export default class PlayRound extends Component<PlayRoundSignature> {
 
   get isWaitingForLandscape(): boolean {
     return this.playStartsAt === undefined;
+  }
+
+  get layoutClass(): string {
+    // If the screen does rotate later, go back to the normal layout.
+    if (this.rotation === undefined || this.orientation.isLandscape) {
+      return LAYOUT_CLASSES.normal;
+    }
+    return LAYOUT_CLASSES[this.rotation];
   }
 
   get isCountingDown(): boolean {
@@ -147,6 +183,21 @@ export default class PlayRound extends Component<PlayRoundSignature> {
     }
   };
 
+  onSideways = (rotation: ContentRotation | undefined): void => {
+    this.#sideways = rotation;
+    this.#sidewaysSince = this.clock.now();
+  };
+
+  /**
+   * For when the screen won't rotate and there's no motion sensor to notice.
+   * Starts the round upright.
+   */
+  playWithoutTurning = (): void => {
+    if (this.isWaitingForLandscape) {
+      this.#start();
+    }
+  };
+
   onTilt = (direction: TiltDirection): void => {
     this.answer(direction === 'down' ? 'correct' : 'pass');
   };
@@ -176,9 +227,21 @@ export default class PlayRound extends Component<PlayRoundSignature> {
   #startIfSideways(): void {
     // The round only starts sideways. Once it has started, turning the phone
     // doesn't pause it, since tilting can briefly look like a turn.
-    if (!this.orientation.isLandscape) {
+    if (this.orientation.isLandscape) {
+      this.#start();
       return;
     }
+
+    // The phone is sideways but the screen hasn't rotated, so rotation lock
+    // is probably on. Draw the round sideways instead.
+    const sidewaysFor = this.now - this.#sidewaysSince;
+    if (this.#sideways !== undefined && sidewaysFor >= ROTATION_LOCK_GRACE_MS) {
+      this.rotation = this.#sideways;
+      this.#start();
+    }
+  }
+
+  #start(): void {
     this.playStartsAt = this.now + COUNTDOWN_SECONDS * 1000;
     this.endsAt = this.playStartsAt + this.settings.roundSeconds * 1000;
   }
@@ -205,112 +268,122 @@ export default class PlayRound extends Component<PlayRoundSignature> {
   }
 
   <template>
-    <div
-      class="bg-plum-900 fixed inset-0 z-10 flex flex-col pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] select-none"
-      data-test-round
-    >
-      {{#if this.isWaitingForLandscape}}
-        <div
-          class="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center"
-          data-test-turn-sideways
-        >
-          <span class="animate-turn text-8xl" aria-hidden="true">📱</span>
-          <p class="text-3xl font-bold" aria-live="polite">
-            Turn your phone sideways
-          </p>
-          <p class="text-lg text-white/80">
-            The countdown starts when it's sideways.
-          </p>
-        </div>
-      {{else if this.isCountingDown}}
-        <div
-          class="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center"
-        >
-          <p class="text-teal text-2xl font-semibold">{{@category.name}}</p>
-          <p
-            class="text-9xl font-bold tabular-nums"
-            aria-live="assertive"
-            data-test-countdown
-          >{{this.countdown}}</p>
-          <p class="text-xl text-white/80">Phone to your forehead!</p>
-        </div>
-      {{else}}
-        <button
-          type="button"
-          class="flex flex-1 items-start justify-center pt-[max(env(safe-area-inset-top),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
-          {{on "click" (fn this.answer "pass")}}
-          data-test-pass
-        >
-          <span><span aria-hidden="true">↑</span> Pass</span>
-        </button>
-        <button
-          type="button"
-          class="flex flex-1 items-end justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
-          {{on "click" (fn this.answer "correct")}}
-          data-test-correct
-        >
-          <span><span aria-hidden="true">↓</span> Correct</span>
-        </button>
-
-        {{! The word sits on top of both tap zones without blocking taps. }}
-        <div
-          class="pointer-events-none absolute inset-0 flex items-center justify-center px-16"
-        >
-          {{#if this.feedback}}
-            <p
-              class="flex items-center gap-3 rounded-3xl px-8 py-4 text-6xl font-bold
-                {{if
-                  (eq this.feedback 'correct')
-                  'bg-teal text-plum-900'
-                  'bg-plum-500 text-white'
-                }}"
-              aria-live="assertive"
-              data-test-feedback={{this.feedback}}
-            >
-              {{#if (eq this.feedback "correct")}}
-                <span aria-hidden="true">✓</span>
-                Correct!
-              {{else}}
-                <span aria-hidden="true">↷</span>
-                Pass
-              {{/if}}
+    <div class="bg-plum-900 fixed inset-0 z-10 select-none" data-test-round>
+      <div
+        class={{this.layoutClass}}
+        data-test-round-layout={{if this.rotation this.rotation "normal"}}
+      >
+        {{#if this.isWaitingForLandscape}}
+          <div
+            class="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center"
+            data-test-turn-sideways
+          >
+            <span class="animate-turn text-8xl" aria-hidden="true">📱</span>
+            <p class="text-3xl font-bold" aria-live="polite">
+              Turn your phone sideways
             </p>
-          {{else if this.word}}
+            <p class="text-lg text-white/80">
+              The countdown starts when it's sideways.
+            </p>
+            <button
+              type="button"
+              class="mt-4 min-h-12 rounded-2xl border border-white/30 px-5 text-lg font-medium text-white/90 active:bg-white/10"
+              {{on "click" this.playWithoutTurning}}
+              data-test-play-without-turning
+            >
+              Screen won't turn? Play without turning
+            </button>
+          </div>
+        {{else if this.isCountingDown}}
+          <div
+            class="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center"
+          >
+            <p class="text-teal text-2xl font-semibold">{{@category.name}}</p>
             <p
-              class="text-center text-7xl leading-tight font-bold break-words"
-              aria-live="polite"
-              data-test-word
-            >{{this.word}}</p>
+              class="text-9xl font-bold tabular-nums"
+              aria-live="assertive"
+              data-test-countdown
+            >{{this.countdown}}</p>
+            <p class="text-xl text-white/80">Phone to your forehead!</p>
+          </div>
+        {{else}}
+          <button
+            type="button"
+            class="flex flex-1 items-start justify-center pt-[max(env(safe-area-inset-top),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
+            {{on "click" (fn this.answer "pass")}}
+            data-test-pass
+          >
+            <span><span aria-hidden="true">↑</span> Pass</span>
+          </button>
+          <button
+            type="button"
+            class="flex flex-1 items-end justify-center pb-[max(env(safe-area-inset-bottom),0.75rem)] text-lg font-semibold text-white/60 active:bg-white/5"
+            {{on "click" (fn this.answer "correct")}}
+            data-test-correct
+          >
+            <span><span aria-hidden="true">↓</span> Correct</span>
+          </button>
+
+          {{! The word sits on top of both tap zones without blocking taps. }}
+          <div
+            class="pointer-events-none absolute inset-0 flex items-center justify-center px-16"
+          >
+            {{#if this.feedback}}
+              <p
+                class="flex items-center gap-3 rounded-3xl px-8 py-4 text-6xl font-bold
+                  {{if
+                    (eq this.feedback 'correct')
+                    'bg-teal text-plum-900'
+                    'bg-plum-500 text-white'
+                  }}"
+                aria-live="assertive"
+                data-test-feedback={{this.feedback}}
+              >
+                {{#if (eq this.feedback "correct")}}
+                  <span aria-hidden="true">✓</span>
+                  Correct!
+                {{else}}
+                  <span aria-hidden="true">↷</span>
+                  Pass
+                {{/if}}
+              </p>
+            {{else if this.word}}
+              <p
+                class="text-center text-7xl leading-tight font-bold break-words"
+                aria-live="polite"
+                data-test-word
+              >{{this.word}}</p>
+            {{/if}}
+          </div>
+        {{/if}}
+
+        <div
+          class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between pt-[max(env(safe-area-inset-top),0.75rem)] pr-[max(env(safe-area-inset-right),1rem)] pl-[max(env(safe-area-inset-left),1rem)]"
+        >
+          <button
+            type="button"
+            class="pointer-events-auto flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/10 px-4 font-semibold active:bg-white/20"
+            {{on "click" this.quit}}
+            data-test-quit
+          >
+            <span aria-hidden="true">✕</span>
+            <span class="sr-only">End round</span>
+          </button>
+          {{#if this.isPlaying}}
+            <p
+              class="rounded-full px-4 py-2 text-2xl font-bold tabular-nums
+                {{if
+                  this.isLowOnTime
+                  'text-plum-900 animate-pulse bg-white'
+                  'bg-white/10'
+                }}"
+              data-test-timer
+            >
+              <span class="sr-only">Time left:</span>
+              {{this.timeLeftLabel}}
+            </p>
           {{/if}}
         </div>
-      {{/if}}
-
-      <div
-        class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between pt-[max(env(safe-area-inset-top),0.75rem)] pr-[max(env(safe-area-inset-right),1rem)] pl-[max(env(safe-area-inset-left),1rem)]"
-      >
-        <button
-          type="button"
-          class="pointer-events-auto flex min-h-12 min-w-12 items-center justify-center rounded-full bg-white/10 px-4 font-semibold active:bg-white/20"
-          {{on "click" this.quit}}
-          data-test-quit
-        >
-          <span aria-hidden="true">✕</span>
-          <span class="sr-only">End round</span>
-        </button>
-        {{#if this.isPlaying}}
-          <p
-            class="rounded-full px-4 py-2 text-2xl font-bold tabular-nums
-              {{if
-                this.isLowOnTime
-                'text-plum-900 animate-pulse bg-white'
-                'bg-white/10'
-              }}"
-            data-test-timer
-          >
-            <span class="sr-only">Time left:</span>
-            {{this.timeLeftLabel}}
-          </p>
-        {{/if}}
       </div>
     </div>
   </template>

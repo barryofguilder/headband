@@ -4,24 +4,33 @@ import { pageTitle } from 'ember-page-title';
 import type { ResultsModel } from 'headband/routes/play/results';
 
 const buttonClass =
-  'flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold transition-transform active:scale-95';
+  'flex min-h-16 sideways:min-h-13 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold transition-transform active:scale-95';
 
 const PlayResults: TOC<{ Args: { model: ResultsModel } }> = <template>
   {{pageTitle "Results"}}
 
-  <section class="flex flex-1 flex-col gap-6 pt-4">
-    <header class="flex flex-col items-center gap-1 text-center">
+  <section
+    class="sideways:grid sideways:grid-cols-2 sideways:grid-rows-[auto_1fr] sideways:gap-x-8 sideways:gap-y-4 sideways:pt-0 flex flex-1 flex-col gap-6 pt-4"
+  >
+    <header
+      class="sideways:col-start-1 sideways:row-start-1 flex flex-col items-center gap-1 text-center"
+    >
       <p class="text-lg text-white/80">
         <span aria-hidden="true">{{@model.category.emoji}}</span>
         {{@model.category.name}}
       </p>
-      <h1 class="text-teal text-6xl font-bold tabular-nums" data-test-score>
+      <h1
+        class="text-teal sideways:text-5xl text-6xl font-bold tabular-nums"
+        data-test-score
+      >
         {{@model.result.correct.length}}
       </h1>
       <p class="text-2xl font-semibold">correct</p>
     </header>
 
-    <div class="grid gap-4">
+    <div
+      class="sideways:col-start-2 sideways:row-span-2 sideways:row-start-1 sideways:content-start grid gap-4"
+    >
       <section class="bg-plum-700/60 rounded-2xl p-4" data-test-correct-list>
         <h2 class="mb-2 text-lg font-semibold">
           <span aria-hidden="true">✓</span>
@@ -59,7 +68,10 @@ const PlayResults: TOC<{ Args: { model: ResultsModel } }> = <template>
       </section>
     </div>
 
-    <nav class="mt-auto flex flex-col gap-3" aria-label="What next">
+    <nav
+      class="sideways:col-start-1 sideways:row-start-2 sideways:justify-end sideways:gap-2 mt-auto flex flex-col gap-3"
+      aria-label="What next"
+    >
       <LinkTo
         @route="play.round"
         @model={{@model.category.id}}

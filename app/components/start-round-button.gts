@@ -43,7 +43,7 @@ export default class StartRoundButton extends Component<StartRoundButtonSignatur
 
     <button
       type="button"
-      class="bg-teal text-plum-900 mt-auto flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold transition-transform active:scale-95"
+      class="bg-teal text-plum-900 sideways:min-h-14 flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold transition-transform active:scale-95"
       {{on "click" this.start}}
       data-test-start
     >

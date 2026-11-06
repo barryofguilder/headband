@@ -2,7 +2,11 @@ import { tracked } from '@glimmer/tracking';
 import { settled } from '@ember/test-helpers';
 import type Owner from '@ember/owner';
 import TiltService from 'headband/services/tilt';
-import type { MotionAccess, TiltDirection } from 'headband/services/tilt';
+import type {
+  ContentRotation,
+  MotionAccess,
+  TiltDirection,
+} from 'headband/services/tilt';
 import OrientationService from 'headband/services/orientation';
 
 /**
@@ -25,9 +29,29 @@ export class FakeTilt extends TiltService {
     return () => this.listeners.delete(onTilt);
   }
 
+  sidewaysWatchers = new Set<(rotation: ContentRotation | undefined) => void>();
+
   async tiltPhone(direction: TiltDirection): Promise<void> {
     for (const listener of this.listeners) {
       listener(direction);
+    }
+    await settled();
+  }
+
+  watchSideways(
+    onChange: (rotation: ContentRotation | undefined) => void,
+  ): () => void {
+    this.sidewaysWatchers.add(onChange);
+    return () => this.sidewaysWatchers.delete(onChange);
+  }
+
+  /**
+   * Reports the phone as held sideways (or upright, with `undefined`), the
+   * way the motion sensor would.
+   */
+  async holdPhone(rotation: ContentRotation | undefined): Promise<void> {
+    for (const watcher of this.sidewaysWatchers) {
+      watcher(rotation);
     }
     await settled();
   }

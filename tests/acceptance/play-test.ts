@@ -11,7 +11,11 @@ import {
   type FakeOrientation,
   type FakeTilt,
 } from 'headband/tests/helpers/fake-device';
-import { COUNTDOWN_SECONDS, FEEDBACK_MS } from 'headband/components/play-round';
+import {
+  COUNTDOWN_SECONDS,
+  FEEDBACK_MS,
+  ROTATION_LOCK_GRACE_MS,
+} from 'headband/components/play-round';
 import type GameService from 'headband/services/game';
 
 module('Acceptance | play', function (hooks) {
@@ -193,6 +197,65 @@ module('Acceptance | play', function (hooks) {
     await clock.advance(100);
     assert.dom('[data-test-turn-sideways]').doesNotExist();
     assert.dom('[data-test-countdown]').hasText('3');
+  });
+
+  test('with rotation lock on, the round draws itself sideways', async function (assert) {
+    orientation.isLandscape = false;
+    await visit('/play/animals/round');
+    assert.dom('[data-test-turn-sideways]').exists();
+
+    await tilt.holdPhone(90);
+    await clock.advance(ROTATION_LOCK_GRACE_MS - 200);
+    assert
+      .dom('[data-test-turn-sideways]')
+      .exists('waits in case the screen rotates');
+
+    await clock.advance(200);
+    assert.dom('[data-test-countdown]').hasText('3');
+    assert
+      .dom('[data-test-round-layout]')
+      .hasAttribute('data-test-round-layout', '90');
+
+    await clock.advance(COUNTDOWN_SECONDS * 1000);
+    await tilt.tiltPhone('down');
+    assert.dom('[data-test-feedback="correct"]').exists('tilt still works');
+  });
+
+  test('a phone turned the other way is drawn the other way', async function (assert) {
+    orientation.isLandscape = false;
+    await visit('/play/animals/round');
+    await tilt.holdPhone(-90);
+    await clock.advance(ROTATION_LOCK_GRACE_MS);
+    assert
+      .dom('[data-test-round-layout]')
+      .hasAttribute('data-test-round-layout', '-90');
+  });
+
+  test('putting the phone down before the wait is over does not start the round', async function (assert) {
+    orientation.isLandscape = false;
+    await visit('/play/animals/round');
+    await tilt.holdPhone(90);
+    await clock.advance(500);
+    await tilt.holdPhone(undefined);
+    await clock.advance(ROTATION_LOCK_GRACE_MS);
+    assert.dom('[data-test-turn-sideways]').exists();
+  });
+
+  test('a screen that rotates normally uses the normal layout', async function (assert) {
+    await visit('/play/animals/round');
+    assert
+      .dom('[data-test-round-layout]')
+      .hasAttribute('data-test-round-layout', 'normal');
+  });
+
+  test('Play without turning starts the round upright', async function (assert) {
+    orientation.isLandscape = false;
+    await visit('/play/animals/round');
+    await click('[data-test-play-without-turning]');
+    assert.dom('[data-test-countdown]').hasText('3');
+    assert
+      .dom('[data-test-round-layout]')
+      .hasAttribute('data-test-round-layout', 'normal');
   });
 
   test('turning the phone upright mid-round does not pause it', async function (assert) {

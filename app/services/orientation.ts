@@ -8,7 +8,7 @@ interface LockableScreenOrientation {
 }
 
 /**
- * Tracks whether the phone is sideways.
+ * Tracks whether the screen is sideways.
  */
 export default class OrientationService extends Service {
   @tracked isLandscape: boolean;
@@ -29,7 +29,8 @@ export default class OrientationService extends Service {
   /**
    * Tries to keep the screen sideways. This works on Android when the app is
    * installed to the home screen. iPhone doesn't allow it, so the round asks
-   * the player to turn the phone instead.
+   * the player to turn the phone instead. `unlock` lets the screen turn
+   * freely again.
    */
   lockLandscape(): void {
     const orientation = screen.orientation as

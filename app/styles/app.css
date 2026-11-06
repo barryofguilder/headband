@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* A phone held sideways: landscape and short. Desktop browsers are landscape
+   too, but tall enough to keep the regular layout. */
+@custom-variant sideways (@media (orientation: landscape) and (max-height: 540px));
+
 @theme {
   --color-teal: #92c9d6;
   --color-plum-900: #2f193b;

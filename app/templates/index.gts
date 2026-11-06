@@ -1,17 +1,28 @@
 import { LinkTo } from '@ember/routing';
 
 const buttonClass =
-  'flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold active:scale-95 transition-transform';
+  'flex min-h-16 sideways:min-h-13 w-full items-center justify-center gap-3 rounded-2xl px-6 text-xl font-semibold active:scale-95 transition-transform';
 
 <template>
-  <section class="flex flex-1 flex-col items-center justify-center gap-10">
-    <div class="flex flex-col items-center gap-4 text-center">
-      <img src="/logo.svg" alt="" class="size-32 drop-shadow-lg" />
+  <section
+    class="sideways:flex-row sideways:gap-10 flex flex-1 flex-col items-center justify-center gap-10"
+  >
+    <div
+      class="sideways:flex-1 sideways:gap-2 flex flex-col items-center gap-4 text-center"
+    >
+      <img
+        src="/logo.svg"
+        alt=""
+        class="sideways:size-24 size-32 drop-shadow-lg"
+      />
       <h1 class="text-teal text-4xl font-bold tracking-tight">Headband</h1>
       <p class="text-lg text-white/80">Guess the word on your head.</p>
     </div>
 
-    <nav class="flex w-full flex-col gap-3" aria-label="Main menu">
+    <nav
+      class="sideways:flex-1 sideways:gap-2 flex w-full flex-col gap-3"
+      aria-label="Main menu"
+    >
       <LinkTo
         @route="play"
         class="{{buttonClass}} bg-teal text-plum-900"

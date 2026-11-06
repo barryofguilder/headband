@@ -3,6 +3,8 @@ import { tracked } from '@glimmer/tracking';
 
 export type TiltDirection = 'down' | 'up';
 
+export type ContentRotation = 90 | -90;
+
 /**
  * Whether the game can read the motion sensor. `unknown` until the player
  * taps Start for the first time.
@@ -37,6 +39,37 @@ interface DeviceOrientationEventWithPermission {
 export function screenFacing(beta: number, gamma: number): number {
   const toRadians = Math.PI / 180;
   return Math.cos(beta * toRadians) * Math.cos(gamma * toRadians);
+}
+
+/**
+ * How far the phone's side has to point at the floor to count as sideways,
+ * from 0 to 1. 0.8 is within about 37 degrees of fully sideways.
+ */
+export const SIDEWAYS_THRESHOLD = 0.8;
+
+/**
+ * Degrees to rotate the screen's content so it reads upright when the phone
+ * is held sideways but the screen didn't rotate (for example, with iPhone's
+ * rotation lock on). 90 means the phone is turned counterclockwise and -90
+ * means clockwise. Undefined when the phone isn't sideways.
+ *
+ * The value checked is the vertical part of the direction the phone's right
+ * edge points.
+ */
+export function contentRotation(
+  beta: number,
+  gamma: number,
+): ContentRotation | undefined {
+  const toRadians = Math.PI / 180;
+  const rightEdgeUp = -Math.cos(beta * toRadians) * Math.sin(gamma * toRadians);
+
+  if (rightEdgeUp >= SIDEWAYS_THRESHOLD) {
+    return 90;
+  }
+  if (rightEdgeUp <= -SIDEWAYS_THRESHOLD) {
+    return -90;
+  }
+  return undefined;
 }
 
 /**
@@ -116,6 +149,28 @@ export default class TiltService extends Service {
     const detector = new TiltDetector(onTilt);
     const handler = (event: DeviceOrientationEvent) => {
       detector.update(event.beta, event.gamma);
+    };
+    window.addEventListener('deviceorientation', handler);
+    return () => window.removeEventListener('deviceorientation', handler);
+  }
+
+  /**
+   * Calls `onChange` with how the content should be rotated whenever the
+   * phone is turned sideways or back. Returns a function that stops listening.
+   */
+  watchSideways(
+    onChange: (rotation: ContentRotation | undefined) => void,
+  ): () => void {
+    let last: ContentRotation | undefined;
+    const handler = (event: DeviceOrientationEvent) => {
+      if (event.beta === null || event.gamma === null) {
+        return;
+      }
+      const rotation = contentRotation(event.beta, event.gamma);
+      if (rotation !== last) {
+        last = rotation;
+        onChange(rotation);
+      }
     };
     window.addEventListener('deviceorientation', handler);
     return () => window.removeEventListener('deviceorientation', handler);

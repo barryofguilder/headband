@@ -31,6 +31,7 @@ export default defineConfig(({ command }) => ({
         theme_color: '#2f193b',
         background_color: '#2f193b',
         display: 'standalone',
+        // Every screen works both ways. The round asks for landscape itself.
         orientation: 'any',
         start_url: '/',
         scope: '/',

@@ -6,7 +6,10 @@ import type { Category } from 'headband/categories';
 const PlayIndex: TOC<{ Args: { model: Category[] } }> = <template>
   <ScreenHeader @title="Pick a category" />
 
-  <ul class="mt-4 grid grid-cols-2 gap-3" data-test-categories>
+  <ul
+    class="sideways:grid-cols-4 mt-4 grid grid-cols-2 gap-3"
+    data-test-categories
+  >
     {{#each @model as |category|}}
       <li>
         <LinkTo

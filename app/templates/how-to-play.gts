@@ -30,7 +30,7 @@ const steps = [
 <template>
   <ScreenHeader @title="How to play" />
 
-  <ol class="mt-4 flex flex-col gap-3" data-test-how-to-play>
+  <ol class="sideways:grid-cols-2 mt-4 grid gap-3" data-test-how-to-play>
     {{#each steps as |step index|}}
       <li class="bg-plum-700/60 flex gap-4 rounded-2xl p-4">
         <span
@@ -45,20 +45,22 @@ const steps = [
     {{/each}}
   </ol>
 
-  <div class="border-teal/40 mt-6 rounded-2xl border p-4">
-    <h2 class="text-teal text-lg font-semibold">No sensor? No problem.</h2>
-    <p class="mt-1 text-white/80">
-      You can also tap. Tap the bottom half of the screen for a right answer,
-      and the top half to pass.
-    </p>
-  </div>
+  <div class="sideways:grid-cols-2 mt-6 grid gap-3">
+    <div class="border-teal/40 rounded-2xl border p-4">
+      <h2 class="text-teal text-lg font-semibold">No sensor? No problem.</h2>
+      <p class="mt-1 text-white/80">
+        You can also tap. Tap the bottom half of the screen for a right answer,
+        and the top half to pass.
+      </p>
+    </div>
 
-  <div class="border-teal/40 mt-6 rounded-2xl border p-4">
-    <h2 class="text-teal text-lg font-semibold">At the end</h2>
-    <p class="mt-1 text-white/80">
-      You’ll see your score, the words you got, and the words you passed. If
-      time runs out while a word is up, it counts as a pass.
-    </p>
+    <div class="border-teal/40 rounded-2xl border p-4">
+      <h2 class="text-teal text-lg font-semibold">At the end</h2>
+      <p class="mt-1 text-white/80">
+        You’ll see your score, the words you got, and the words you passed. If
+        time runs out while a word is up, it counts as a pass.
+      </p>
+    </div>
   </div>
 </template>
 

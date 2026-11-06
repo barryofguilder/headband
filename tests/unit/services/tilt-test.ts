@@ -1,6 +1,7 @@
 import { module, test } from 'qunit';
 import {
   TiltDetector,
+  contentRotation,
   screenFacing,
   type TiltDirection,
 } from 'headband/services/tilt';
@@ -73,5 +74,30 @@ module('Unit | Service | tilt', function () {
     detector.update(...UPRIGHT);
     detector.update(null, 0);
     assert.deepEqual(tilts, []);
+  });
+
+  test('contentRotation tells which way a sideways phone is turned', function (assert) {
+    assert.strictEqual(contentRotation(0, 0), undefined, 'flat');
+    assert.strictEqual(contentRotation(90, 0), undefined, 'upright portrait');
+    assert.strictEqual(
+      contentRotation(...UPRIGHT),
+      -90,
+      'turned clockwise, right edge down',
+    );
+    assert.strictEqual(
+      contentRotation(...UPRIGHT_OTHER_WAY),
+      90,
+      'turned counterclockwise, right edge up',
+    );
+    assert.strictEqual(
+      contentRotation(...SLIGHTLY_BACK),
+      -90,
+      'still sideways when leaning back a little',
+    );
+    assert.strictEqual(
+      contentRotation(45, 45),
+      undefined,
+      'halfway is not sideways',
+    );
   });
 });

@@ -62,7 +62,10 @@ Players may be in a loud, busy room or holding the phone at arm's length. Keep t
 
 - Tilt is the main control, with tap as a backup (top half to pass, bottom half for correct). iOS needs a motion permission prompt from a user tap, plus HTTPS.
 - Rounds default to 60 seconds. The default is set in Settings and can be changed on the Get ready screen, and that change is remembered. A 3-2-1 countdown starts each round.
-- Rounds are played in landscape, and the menus stay upright. iOS can't lock orientation for each screen, so the manifest uses `orientation: "any"` and the round waits on a "Turn your phone sideways" screen until the phone is sideways. Once a round starts, turning the phone doesn't pause it.
+- The game is played on phones. Every screen except the round works in both portrait and landscape, and the manifest uses `orientation: "any"`.
+  - Landscape layouts use the `sideways:` Tailwind variant (defined in `app/styles/app.css`): landscape and under 540px tall. Desktop browsers are tall enough to keep the portrait-style column. To check landscape on a desktop, use Chrome's device toolbar or a short window.
+  - The round is landscape only. It waits on "Turn your phone sideways" until the screen is landscape, and Android installs also lock to landscape during the round. If the motion sensor says the phone has been sideways for a second but the screen is still portrait (iPhone rotation lock is on), the round draws itself sideways with a CSS rotation instead. "Play without turning" starts the round upright, for when there's no sensor to notice.
+  - Once a round starts, turning the phone doesn't pause it.
 - Tilt (`app/services/tilt.ts`) measures how far the screen faces the floor or ceiling from the `deviceorientation` angles, so it works in either landscape direction. Past about 30 degrees counts, and the phone has to return near upright before the next tilt counts. Tests use `FakeTilt` and `FakeOrientation` from `tests/helpers/fake-device.ts`.
 - The round asks the browser to keep the screen on (`app/utils/wake-lock.ts`), since nobody touches the screen when playing by tilt.
 - Score is per round only, with no running totals or teams. The word on screen when time runs out counts as a pass.

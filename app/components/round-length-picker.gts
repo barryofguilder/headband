@@ -41,7 +41,7 @@ export default class RoundLengthPicker extends Component {
     <section aria-labelledby="round-length-label">
       <h2
         id="round-length-label"
-        class="mb-3 text-center text-lg font-semibold"
+        class="sideways:mb-1 mb-3 text-center text-lg font-semibold"
       >
         Round length
       </h2>
